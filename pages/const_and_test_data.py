@@ -1,6 +1,6 @@
 class TestData:
-    TEST_LOGIN = 'EAlekseeva@cspfmba.ru'
-    TEST_PASSWORD = 'KateSilver1'
+    TEST_LOGIN = '*****'
+    TEST_PASSWORD = '****'
     SEARCH_COMPETENCY = 'CRISPR'
 
 
