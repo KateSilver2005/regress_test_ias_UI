@@ -1,6 +1,6 @@
 from selenium.webdriver.common.by import By
 
-from .const_and_test_data import Const
+from .const_and_test_data import ConstMainPage
 
 
 class HeaderLocators:
@@ -76,10 +76,10 @@ class MainPageLocators:
         TAB_PERSON
     ]
     PLACEHOLDERS_IN_SEARCH_AREA_TABS = [
-        (TAB_COMPETENCY, Const.placeholder_competency),
-        (TAB_DOC, Const.placeholder_doc),
-        (TAB_ORG, Const.placeholder_org),
-        (TAB_PERSON, Const.placeholder_person)
+        (TAB_COMPETENCY, ConstMainPage.placeholder_competency),
+        (TAB_DOC, ConstMainPage.placeholder_doc),
+        (TAB_ORG, ConstMainPage.placeholder_org),
+        (TAB_PERSON, ConstMainPage.placeholder_person)
     ]
 
     GRAFIC_VNESENIYA_SVEDEDIY = (By.CSS_SELECTOR, '.col-8 .card-body')
@@ -102,9 +102,15 @@ class MainPageLocators:
     PREVIOUS_SLIDE_IN_GLOBAL_CHARTS = (By.CSS_SELECTOR, '.container > div > .card .card-body .carousel__prev')
     SLIDE_IN_GLOBAL_CHARTS = (By.ID, 'chart-graph{}')
     TITLE_OF_SLIDE_IN_GLOBAL_CHARTS = (By.CSS_SELECTOR, '.card-body .carousel__viewport li:nth-child({}) h5')
-    COLOR_IN_LEGEND_CHART_1_IN_GLOBAL_CHARTS = (By.CSS_SELECTOR, '#legend-graph0 li:nth-child({}) span')
+    COLOR_OF_ELEMENT_IN_LEGEND_CHART_IN_GLOBAL_CHARTS = (By.CSS_SELECTOR, '#legend-graph{} li:nth-child({}) span')
+    TITLE_OF_ELEMENT_IN_LEGEND_CHART_IN_GLOBAL_CHARTS = (By.CSS_SELECTOR, '#legend-graph{} li:nth-child({}) p')
 
     INFO_FOR_USERS = (By.CSS_SELECTOR, 'main .container >div >div.row:last-child')
+    TITLE_INFO_FOR_USERS = (By.CSS_SELECTOR, 'h1:nth-of-type(2)')
+    ELEMENT_IN_INFO_FOR_USERS = (By.CSS_SELECTOR, 'main .container >div >div.row:last-child >div:nth-child({})')
+    ICON_OF_ELEMENT_IN_INFO_FOR_USERS = (By.CSS_SELECTOR, 'main .container > div > div:last-child > .col-4.mb-4:nth-child({}) img')
+    TITLE_OF_ELEMENT_IN_INFO_FOR_USERS = (By.CSS_SELECTOR, 'main .container > div > div:last-child > .col-4.mb-4:nth-child({}) .title')
+    URL_OF_ELEMENT_IN_INFO_FOR_USERS = (By.CSS_SELECTOR, 'main .container >div >div.row:last-child >div:nth-child({}) a')
 
 
 
@@ -231,14 +237,40 @@ class SearchCompetencyPageLocators:
     SEARCH_BAR = (By.CSS_SELECTOR, 'input[placeholder="Поиск компетенций"]')
     BUTTON_ENTER = (By.CSS_SELECTOR, 'button.btn-search[type="button"]')
     BUTTON_SEARCH = (By.CSS_SELECTOR, '.btn-search[type="button"]')
-    MODULE_MAP = (By.CSS_SELECTOR, '.container >div >div:nth-child(6)')
+    BUTTON_CLEAR = (By.CSS_SELECTOR, '.fas.fa-times-circle')
+    MODULE_MAP = (By.CSS_SELECTOR, '.container >div >div:nth-child(6) .card-body')
     CONTENT_MAP = (By.ID, 'map')
-    MODULE_STATISTICS = (By.CSS_SELECTOR, '.container >div >div:nth-child(7)')
-    CONTENT_STATISTICS = (By.ID, 'collapse-stats')
-    MODULE_GRAPH_AK = (By.CSS_SELECTOR, '.container >div >div:nth-child(8)')
-    MODULE_GRAPH_KO = (By.CSS_SELECTOR, '.container >div >div:nth-child(9)')
+    MODULE_STATISTICS = (By.CSS_SELECTOR, '[href="#collapse-stats"]')
+    CONTENT_STATISTICS = (By.CSS_SELECTOR, '.container >div >div:nth-child(7)')
+    MODULE_GRAPH_AK = (By.CSS_SELECTOR, '[href="#collapse-social-graph-author-teams"]')
+    CONTENT_GRAPH_AK = (By.CSS_SELECTOR, '.container >div >div:nth-child(8)')
+    MODULE_GRAPH_KO = (By.CSS_SELECTOR, '[href="#collapse-social-graph-organization-teams"]')
+    CONTENT_GRAPH_KO = (By.CSS_SELECTOR, '.container >div >div:nth-child(9)')
     MODULE_RATING = (By.CSS_SELECTOR, '.container >div >div:nth-child(10)')
-    CONTENT_RATING = (By.CSS_SELECTOR, '.container >div >div:nth-child(10)')
+
+class MapLocators:
+    TITLE = (By.CSS_SELECTOR, '.container >div >div:nth-child(6) h3')
+    BUTTON_FULL_SCREEN = (By.CSS_SELECTOR, '.container >div >div:nth-child(6)  > div > div > div > a:nth-child(1)')
+    BUTTON_REFRESH = (By.CSS_SELECTOR, '.container >div >div:nth-child(6)  > div > div > div > a:nth-child(2)')
+    ZOOMCONTROL_BODY = (By.CSS_SELECTOR, '.zoomcontrol-slider-body')
+    BUTTON_ZOOMCONTROL_OUT = (By.CSS_SELECTOR, '.zoomcontrol-zoom-out')
+    BUTTON_ZOOMCONTROL_IN = (By.CSS_SELECTOR, '.zoomcontrol-zoom-in')
+    ZOOMCONTROL_SLIDER = (By.CSS_SELECTOR, '.zoomcontrol-slider')
+    ZOOMCONTROL_LEVEL_REGIONS = (By.CSS_SELECTOR, '.zoomcontrol-hints-container div:nth-child(1) span')
+    ZOOMCONTROL_LEVEL_AGLOMIRATIONS = (By.CSS_SELECTOR, '.zoomcontrol-hints-container div:nth-child(2) span')
+    ZOOMCONTROL_LEVEL_TOWNS = (By.CSS_SELECTOR, '.zoomcontrol-hints-container div:nth-child(3) span')
+    HINTS_ZOOMCONTROL_LEVELS = (By.CSS_SELECTOR, '.zoomcontrol-hints-container div:nth-child({}) span')
+    ZOOMCONTROL_LEVELS = (By.CSS_SELECTOR, '.zoomcontrol-hints-container div:nth-child({})')
+    SCALE_VALUE = (By.CSS_SELECTOR, '.zoom-text')
+
+
+class StatisticLocators:
+    TITLE = (By.CSS_SELECTOR, '.container >div >div:nth-child(7) h3')
+    QUANTITY_CHARTS = (By.CSS_SELECTOR, '#chart > div')
+    LEGEND_CHART = (By.CSS_SELECTOR, '#chart >div:nth-child({}) div')
+
+
+
 
 class ReleasePageLocators:
     TITLE = (By.ID, 'h1')

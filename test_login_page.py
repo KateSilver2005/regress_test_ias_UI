@@ -4,14 +4,14 @@ import pytest
 
 from .pages.login_page import LoginPage
 from .pages.main_page import MainPage
-from .pages.const_and_test_data import Const
+from .pages.const_and_test_data import Const, Env
 
 
 
 class TestLoginPage:
     @pytest.fixture(scope="function", autouse=True)
     def setup(self, browser):
-        self.login_link = Const.MAIN_LINK
+        self.login_link = Env.MAIN_LINK
         self.login_page = LoginPage(browser, self.login_link)
         self.login_page.open()
         yield

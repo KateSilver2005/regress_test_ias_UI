@@ -11,7 +11,7 @@ from selenium.webdriver.common.by import By
 
 from .locators import HotNewsLocators
 from .base_page import BasePage
-from .const_and_test_data import Const
+from .const_and_test_data import Const, ConstHotNewsModule
 
 
 class HotNewsModule(BasePage):
@@ -114,9 +114,9 @@ class HotNewsModule(BasePage):
             date = attributes.get("date")
             icon = attributes.get("description_icon")
             assert icon, (f"В модуле бегущей строки новостей Тип новости на {page}-странице у {news}-новости отсутствует.")
-            if icon == Const.icon_scipub:
+            if icon == ConstHotNewsModule.icon_scipub:
                 pytest.skip(f"Пропустили тесты для {news}-новости, так как у нее тип новости - Публикации.")
-            elif icon == Const.icon_smi:
+            elif icon == ConstHotNewsModule.icon_smi:
                 date.strip()
                 assert date.strip(), (f"В модуле бегущей новостей строки Дата на {page}-странице у {news}-новости "
                                       f"отсутствует. ФР - {date.strip()}")
@@ -185,11 +185,11 @@ class HotNewsModule(BasePage):
     def should_be_page_news(self):
         try:
             assert (self.browser.current_url in
-                    Const.EACH_NEWS_PAGE), (
+                    ConstHotNewsModule.EACH_NEWS_PAGE), (
                 f"Переход осуществлен не на страницу 'Новости Медицины' (тест -"
                 f"для {self.__class__.__name__}. "
                 f"Фактический урл - {self.browser.current_url}. "
-                f"Ожидаемый - {Const.EACH_NEWS_PAGE}. "
+                f"Ожидаемый - {ConstHotNewsModule.EACH_NEWS_PAGE}. "
                 f" {self.take_screenshot_message()}")
         except Exception as e:
             print(f"Ошибка при переходе на раздел с новостями из модуля бегущей строки новостей: {e}, {type(e)}")

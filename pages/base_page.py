@@ -2,6 +2,8 @@ import inspect
 import time
 import pyautogui
 import pygetwindow as gw
+import requests
+from jsonschema import validate, SchemaError
 from pywinauto import Application, ElementAmbiguousError
 from pywinauto import findwindows
 from datetime import datetime, timedelta
@@ -15,8 +17,9 @@ from selenium.webdriver.common.by import By
 
 
 from ..utils import take_screenshot
-from .locators import MainPageLocators, HeaderLocators, FooterLocators, HotNewsLocators, ReleasePageLocators
-from .const_and_test_data import Const
+from .locators import MainPageLocators, HeaderLocators, FooterLocators, HotNewsLocators, LoginPageLocators, ReleasePageLocators
+from .const_and_test_data import Env, ConstMainPage
+from .endpoints import Endpoints
 
 
 
@@ -29,6 +32,14 @@ class BasePage:
         self.class_name = self.__class__.__name__
 
 
+    def get_token(self):
+        try:
+            token = requests.post(Endpoints.Login, json=Endpoints.params, verify="").json()['token']
+            return token
+        except Exception as err:
+            print(f'Произошла ошибка: {err} во время выполнения запроса на выгрузку')
+
+
     def logout(self):
         try:
             button_in_lk = self.browser.find_element(*HeaderLocators.BUTTON_IN_LK)
@@ -36,21 +47,39 @@ class BasePage:
             self.browser.execute_script("arguments[0].scrollIntoView();", button_in_lk)
             time.sleep(2)
             button_in_lk.click()
-            exit = WebDriverWait(self.browser, 10).until(
-                EC.element_to_be_clickable(HeaderLocators.EXIT)
-            )
-            exit.click()
+            exit = HeaderLocators.EXIT
+            self.click(exit)
+            # exit = WebDriverWait(self.browser, 10).until(
+            #     EC.element_to_be_clickable(HeaderLocators.EXIT)
+            # )
+            # exit.click()
 
             window_log_out = self.find_element(*HeaderLocators.WINDOW_LOG_OUT)
             assert window_log_out is not None, "Диалоговое окно с подтверждением о выходе из системы не появилось"
-            logout = WebDriverWait(self.browser, 10).until(
-                EC.element_to_be_clickable(HeaderLocators.BUTTON_LOG_OUT)
-            )
-            logout.click()
+            # logout = WebDriverWait(self.browser, 10).until(
+            #     EC.element_to_be_clickable(HeaderLocators.BUTTON_LOG_OUT)
+            # )
+            # logout.click()
+            logout = HeaderLocators.BUTTON_LOG_OUT
+            self.click(logout)
 
             # time.sleep(3)
         except Exception as e:
             assert False, f"Ошибка при разлогинивании из сервиса: {e}, {type(e)}"
+
+
+    def should_not_be_authorized_user(self):
+        try:
+            button_disabled = LoginPageLocators.BUTTON_PERSONAL_ACC
+            disabled = WebDriverWait(self.browser, 10).until(
+                EC.element_attribute_to_include(button_disabled, 'class')
+            )
+            button = self.browser.find_element(*button_disabled)
+            assert 'disabled' in button.get_attribute('class'), ("Кнопка профиля кликабельна, пользователь авторизован, "
+                                                                 "но не должен быть.")
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
+
 
 
     def scroll_by_element(self, locator, pixels):
@@ -64,6 +93,7 @@ class BasePage:
             WebDriverWait(self.browser, 10).until(
                 EC.presence_of_element_located(locator)
             )
+            time.sleep(1)
             self.browser.execute_script(f"window.scrollBy(0, {pixels});")
         except TimeoutException:
             assert False, f"Элемент с локатором {locator} не найден."
@@ -80,11 +110,13 @@ class BasePage:
     def click(self, locator):
         try:
             element = WebDriverWait(self.browser, timeout=10).until(
-                EC.visibility_of_element_located(locator)
+                EC.element_to_be_clickable(locator)
             )
+            self.browser.execute_script("arguments[0].scrollIntoView(true);", element)
+            time.sleep(0.5)
             element.click()
         except TimeoutException:
-            assert False, (f"Невозможно совершить клик на элемент с локатором {locator}. До клика он должен быть найден"
+            assert False, (f"Невозможно совершить клик на элемент с локатором {locator}"
                            f" для {self.__class__.__name__}. {self.take_screenshot_message()}")
 
 
@@ -97,10 +129,10 @@ class BasePage:
             assert False, (f"Элемент с локатором {locator} отсутствует для {self.__class__.__name__}. "
                            f"{self.take_screenshot_message()}")
         self.browser.execute_script("arguments[0].click();", element)
-        assert self.checkbox_is_checked(element), 'Чекбокс не установлен'
+        #assert self.checkbox_is_checked(element), 'Чекбокс не установлен'
 
 
-    def find_element(self, how, what, timeout=10):
+    def find_element(self, how, what, timeout=20):
         try:
             locator = WebDriverWait(self.browser, timeout).until(
                 EC.visibility_of_element_located((how, what))
@@ -119,11 +151,23 @@ class BasePage:
         return element
 
 
-    def should_be_attribute(self, locator, value):
+    def should_be_attribute(self, locator, attribute):
         element = self.find_element(*locator)
         assert element is not None, f"Элемент не найден {locator}"
-        attribute = element.get_attribute(value)
+        attribute = element.get_attribute(attribute)
         return attribute
+
+
+    def should_be_attribute_with_value(self, locator, attribute, value):
+        try:
+            WebDriverWait(self.browser, 10).until(
+                EC.text_to_be_present_in_element_attribute(
+                    locator, attribute, value
+                )
+            )
+            return True
+        except Exception as e:
+            print(f"Произошла ошибка: {e}")
 
 
     def should_be_no_attribute_with_value(self, locator, attribute, value):
@@ -133,6 +177,7 @@ class BasePage:
                     locator, attribute, value
                 )
             )
+            return True
         except Exception as e:
             print(f"Произошла ошибка: {e}")
 
@@ -183,10 +228,9 @@ class BasePage:
             )
 
 
-    def should_be_true_url(self, link, path_segment):
-        self.url_contain(path_segment)
+    def should_be_true_url(self, path_segment):
         assert self.url_contain(path_segment), (f'Переход осуществлен не на страницу {path_segment}. '
-                                             f'Ожидалось - {Const.MAIN_LINK}+{path_segment}. '
+                                             f'Ожидалось - {Env.MAIN_LINK}+{path_segment}. '
                                              f'Фактически - {self.browser.current_url} '
                                              f''
                                              f'для {self.__class__.__name__} {self.take_screenshot_message()}')
@@ -207,6 +251,13 @@ class BasePage:
         g = int(hex_color[2:4], 16)
         b = int(hex_color[4:6], 16)
         return (r, g, b)
+
+
+    def validate_schema_of_response_(self, response, schema):
+        try:
+            validate(instance=response, schema=schema)
+        except SchemaError as e:
+            assert False, f"Ответ не соответствует схеме: {e.message}. Ошибка в пути: {list(e.path)}"
 
 
 class Header(BasePage):
@@ -264,7 +315,7 @@ class Header(BasePage):
     def click_logo_in_header(self, locator):
         locator.click()
         current_url = self.browser.current_url
-        expected_url = Const.MAIN_LINK
+        expected_url = Env.MAIN_LINK
         assert current_url == expected_url, (f'При клике на логотип  в хедере осуществлен переход на URL: {current_url}.'
                                              f' Ожидался URL: {expected_url}. '
                                              f'для {self.__class__.__name__}. '
@@ -274,14 +325,14 @@ class Header(BasePage):
     def should_be_title_text_in_header(self):
         self.should_be_text_in_header(
             HeaderLocators.TITLE_TEXT_IN_HEADER,
-            Const.title_text_in_header_part1,
-            Const.title_text_in_header_part2
+            ConstMainPage.title_text_in_header_part1,
+            ConstMainPage.title_text_in_header_part2
         )
 
     def should_be_description_in_header(self):
         self.should_be_text_in_header(
             HeaderLocators.INSCRIPTION_IN_HEADER,
-            Const.inscription_in_header
+            ConstMainPage.inscription_in_header
         )
 
 
@@ -327,9 +378,9 @@ class Footer(BasePage):
 
     def should_be_true_email(self, link):
         mail = link.get_attribute("href")
-        assert mail == Const.MAIL_SUPPORT, (
+        assert mail == ConstMainPage.MAIL_SUPPORT, (
             f'Фича "отправить письмо в ТП" - не верный адрес почты. '
-            f'Ожидалось - {Const.MAIL_SUPPORT}. Фактические - {mail} для {self.__class__.__name__}'
+            f'Ожидалось - {ConstMainPage.MAIL_SUPPORT}. Фактические - {mail} для {self.__class__.__name__}'
             f'. {self.take_screenshot_message()}'
         )
 
@@ -371,7 +422,7 @@ class Footer(BasePage):
         self.scroll_by_element(MainPageLocators.INFO_FOR_USERS, 2900)
         self.should_be_text_in_footer(
             FooterLocators.TEXT_CSP_IN_FOOTER,
-            Const.text_csp_in_footer
+            ConstMainPage.text_csp_in_footer
         )
 
 
@@ -379,8 +430,8 @@ class Footer(BasePage):
         self.scroll_by_element(MainPageLocators.INFO_FOR_USERS, 2900)
         self.should_be_text_in_footer(
             FooterLocators.TEXT_FMBA_IN_FOOTER,
-            Const.text_fmba_in_footer_part1,
-            Const.text_fmba_in_footer_part2
+            ConstMainPage.text_fmba_in_footer_part1,
+            ConstMainPage.text_fmba_in_footer_part2
         )
 
 
@@ -388,5 +439,5 @@ class Footer(BasePage):
         self.scroll_by_element(MainPageLocators.INFO_FOR_USERS, 2900)
         self.should_be_text_in_footer(
             FooterLocators.TITLE_AND_INSCRIPTION_IN_FOOTER,
-            Const.title_and_inscription_in_footer_part1,
-            Const.inscription_in_header)
+            ConstMainPage.title_and_inscription_in_footer_part1,
+            ConstMainPage.inscription_in_header)

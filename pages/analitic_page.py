@@ -1,6 +1,6 @@
 from .base_page import BasePage
 from .locators import AnaliticPageLocators
-from .const_and_test_data import Const
+from .const_and_test_data import ConstAnaliticPage, Env
 
 
 class PageAnalitic(BasePage):
@@ -10,8 +10,8 @@ class PageAnalitic(BasePage):
 
     def should_be_page_analitic(self):
         title = self.should_be_element(AnaliticPageLocators.TITLE, 'Заголовок на странице не найден')
-        path_segment = Const.analitic_path
-        expected_title = Const.title_in_analitic_page
-        url = Const.MAIN_LINK + path_segment
-        self.should_be_true_url(url, path_segment)
+        path_segment = ConstAnaliticPage.analitic_path
+        expected_title = ConstAnaliticPage.title_in_analitic_page
+        url = Env.MAIN_LINK + path_segment
+        self.should_be_true_url(path_segment)
         self.should_be_correct_title(title, expected_title)

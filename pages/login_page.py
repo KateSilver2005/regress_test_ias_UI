@@ -53,17 +53,7 @@ class LoginPage(BasePage):
                                                                            f"{self.take_screenshot_message()}")
 
 
-    def should_not_be_authorized_user(self):
-        try:
-            button_disabled = LoginPageLocators.BUTTON_PERSONAL_ACC
-            disabled = WebDriverWait(self.browser, 10).until(
-                EC.element_attribute_to_include(button_disabled, 'class')
-            )
-            button = self.browser.find_element(*button_disabled)
-            assert 'disabled' in button.get_attribute('class'), ("Кнопка профиля кликабельна, пользователь авторизован, "
-                                                                 "но не должен быть.")
-        except Exception as e:
-            print(f"Произошла ошибка: {e}")
+
 
 
 

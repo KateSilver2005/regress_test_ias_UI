@@ -1,15 +1,15 @@
 from .base_page import BasePage
 from .locators import NewsPageLocators
-from .const_and_test_data import Const
+from .const_and_test_data import ConstNewsPage, Env
 
 class NewsPage(BasePage):
 
     def should_be_page_news(self):
         title = self.should_be_element(NewsPageLocators.TITLE_MAIN_PAGE, 'Заголовок на странице не найден')
-        path_segment = Const.news_path
-        expected_string = Const.title_in_news_page
-        url = Const.MAIN_LINK + path_segment
-        self.should_be_true_url(url, path_segment)
+        path_segment = ConstNewsPage.news_path
+        expected_string = ConstNewsPage.title_in_news_page
+        url = Env.MAIN_LINK + path_segment
+        self.should_be_true_url(path_segment)
         self.should_be_correct_title(title, expected_string)
 
 
@@ -111,8 +111,8 @@ class NewsPage(BasePage):
                                                              page, news):
         try:
             icon = {
-                'fal fa-microscope': Const.title_icon_scipub_in_hot_news,
-                'fal fa-newspaper': Const.title_icon_smi_in_hot_news
+                'fal fa-microscope': ConstNewsPage.title_icon_scipub_in_hot_news,
+                'fal fa-newspaper': ConstNewsPage.title_icon_smi_in_hot_news
             }
             type_icon_page = icon.get(type_icon_from_page, 'Неизвестный тип')
             type_icon_from_hot_news = title_date_icon_link_data.get(page, {}).get(news, {}).get('type')
@@ -131,8 +131,8 @@ class NewsPage(BasePage):
                                                                            description_icon, page, news):
         try:
             description = {
-                'Горячие новости': Const.description_icon_smi_in_hot_news,
-                'Публикации': Const.description_icon_scipub_in_hot_news
+                'Горячие новости': ConstNewsPage.description_icon_smi_in_hot_news,
+                'Публикации': ConstNewsPage.description_icon_scipub_in_hot_news
             }
             description_icon_on_page = description.get(description_icon, 'Неизвестное описание')
             description_icon_from_hot_news = (title_date_icon_link_data.get(page, {})

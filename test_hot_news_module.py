@@ -8,7 +8,7 @@ from .pages.news_page import NewsPage
 from .pages.main_page import MainPage
 from .pages.base_page import Header
 from .pages.hot_news_module import HotNewsModule
-from .pages.const_and_test_data import Const
+from .pages.const_and_test_data import Const, Env
 
 
 
@@ -21,7 +21,7 @@ def reset_total_count(request):
 class TestMainPageHotNews:
     @pytest.fixture(scope="class", autouse=True)
     def setup(self, module_browser, request):
-        self.login_link = Const.MAIN_LINK
+        self.login_link = Env.MAIN_LINK
         self.login_page = LoginPage(module_browser, self.login_link)
         self.login_page.open()
         self.login_page.log_in()
@@ -114,7 +114,6 @@ class TestMainPageHotNews:
         hot_news_module.should_be_link_in_hot_news(title_date_icon_link_data, page, news)
 
 
-    #----------------------------------------------------
     @pytest.mark.dependency(depends=["module_with_hot_news"])
     @pytest.mark.parametrize("page, news", [(page, news) for page in range(1, 56) for news in range(1, 6)])
     def test_should_be_equal_title_in_page_news(self, module_browser, page, news, title_date_icon_link_data):
